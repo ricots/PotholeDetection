@@ -36,6 +36,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -50,10 +51,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private Button btnFindPath;
     private EditText etOrigin;
     private EditText etDestination;
+    private TextView summary;
     private List<Marker> originMarkers = new ArrayList<>();
     private List<Marker> destinationMarkers = new ArrayList<>();
     private List<Polyline> polylinePaths = new ArrayList<>();
     private ProgressDialog progressDialog;
+    private String link = "http://projectnoob.site88.net/retrieve.php?";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,18 +70,35 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         btnFindPath = (Button) findViewById(R.id.btnFindPath);
         etOrigin = (EditText) findViewById(R.id.etOrigin);
         etDestination = (EditText) findViewById(R.id.etDestination);
+        summary = (TextView) findViewById(R.id.summary);
+
 
         btnFindPath.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 sendRequest();
+                try{
+                    String origin    = URLEncoder.encode(etOrigin.getText().toString(), "UTF-8");
+                    String destination  = URLEncoder.encode(etDestination.getText().toString(), "UTF-8");
+
+                    link = "http://projectnoob.site88.net/retrieve.php?origin="+origin+"&destination="+destination;
+
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                }
                 new RetrieveTask().execute();
+
+                summary.setText("The route "+etOrigin.getText()+"to " +etDestination.getText().toString()+"has x potholes. The score is 'x'");
             }
         });
+
     }
 
 
     private class RetrieveTask extends AsyncTask<Void, Void, String> {
+
+
+
 
         @Override
         protected String doInBackground(Void... params) {
@@ -87,7 +107,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             StringBuffer sb = new StringBuffer();
             try {
                 Log.d("max", "in try");
-                String link = "http://projectnoob.site88.net/retrieve.php";
+//                String link = "http://projectnoob.site88.net/retrieveold.php";
                 url = new URL(link);
                 URLConnection conn = url.openConnection();
                 conn.setDoOutput(true);
